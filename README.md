@@ -27,25 +27,45 @@ Now you can import the package in Python3 as: "import vicon"
 -----------------------------------------------------------------------------
 
 Sensor locations:
+
 0: elbow (right)
+
 1: wrist (right)
+
 2: midforearm (right)
+
 3: hand finger (right)
+
 4: shoulder (right)
+
 5: neck
+
 6: shoulder (left)
+
 7: elbow (left)
+
 8: wrist (left)
+
 9: hand finger (left)
+
 10: waist (right side)
+
 11: knee (right)
+
 12: ankle (right)
+
 13: foot (right)
+
 14: waist (left side)
+
 15: knee (left)
+
 16: ankle (left)
+
 17: foot (left)
+
 18: eye (right)
+
 19: ear (left)
 
 -----------------------------------------------------------------------------
