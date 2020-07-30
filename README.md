@@ -82,8 +82,7 @@ Institution: Institute of Computing/University of Campinas and Research, Innovat
 
 Funder: FAPESP (S. Paulo Research Foundation), Brazil
 
-Acknowledgements: Arthur Valencio is supported by the FAPESP grant 2018/09900-8 and acknowledges this work as part of the activities of the FAPESP Research 	     
-Innovation and Dissemination Center for Neuromathematics (grant 2013/07699-0, S. Paulo Research Foundation)
+Acknowledgements: Arthur Valencio is supported by the FAPESP grant 2018/09900-8 and acknowledges this work as part of the activities of the FAPESP Research Innovation and Dissemination Center for Neuromathematics (grant 2013/07699-0, S. Paulo Research Foundation)
 
 Licence text:
 
