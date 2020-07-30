@@ -3,6 +3,7 @@
 This package provides functions for data analysis from VICON Motion Capture system
 
 -----------------------------------------------------------------------------
+
 Installation:
 
 Windows:
@@ -20,9 +21,11 @@ Linux:
 Done!
 
 Now you can import the package in Python3 as: "import vicon"
+
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
+
 Sensor locations:
 0: elbow (right)
 1: wrist (right)
@@ -44,9 +47,11 @@ Sensor locations:
 17: foot (left)
 18: eye (right)
 19: ear (left)
+
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
+
 Licence and acknoledgements
 Open source licence: MIT
 Developer: Arthur Valencio
