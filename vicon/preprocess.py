@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 def preprocess(filename_in,filename_out,center=None):
     '''Reads a CSV file from VICON Motion Capture and
     creates a new CSV file only with the trajectories,
@@ -18,10 +15,10 @@ def preprocess(filename_in,filename_out,center=None):
     center: str, optional
         The option to re-reference the viewing perspective:
         options:
-            center='shoulders': sets the view along the
-                shoulder axis, hence making the points appear
-                at the same screen location despite possible
-                movement in the acquisition room
+            center='shoulder': sets the view along the
+                neck-shoulder axis, hence transforming
+                a walk around the room to a walk on a
+                treadmill
             center='mean': changes the axis origin to the
                 mean, hence centralizing the acquisition data
                 in the screen
@@ -37,13 +34,16 @@ def preprocess(filename_in,filename_out,center=None):
         video of the movement at specified viewing angle
     scrambled_video: uses pre-processed VICON data to produce
         video of scrambled points (non-biological motion)
+    central_dot: generate video of a central dot (resting interval)
 
     Example
     -------
     vicon.preprocess('C:\\Users\\MyUser\\Documents\\Vicon\\acquisition.csv',
         'C:\\Users\\MyUser\\Documents\\Vicon\\preprocessed.csv',center='shoulders')
     '''
-    
+    import numpy as np
+    import pandas as pd
+
     #reading data
     file = pd.read_csv(filename_in,header=None,sep='\n')
     i=file[file[0]=='Trajectories']
@@ -58,8 +58,8 @@ def preprocess(filename_in,filename_out,center=None):
     zdata=data.filter(['Z','Z.1','Z.2','Z.3','Z.4','Z.5','Z.6','Z.7','Z.8','Z.9','Z.10','Z.11','Z.12','Z.13','Z.14','Z.15','Z.16','Z.17','Z.18','Z.19'],axis=1)
 
     theta=np.zeros(numframes)
-    if center=='shoulders':
-        #coordinate translation to X4 (right shoulder)
+    if center=='shoulder':
+        #coordinate translation to X5 (neck)
         print("axis translation")
         for i in range(numframes):
             xdata.loc[i]=xdata.loc[i]-xdata.loc[i,'X.4']
@@ -81,6 +81,10 @@ def preprocess(filename_in,filename_out,center=None):
                     theta[i]=np.pi-np.absolute(theta[i])
                 elif theta[i]>0 and (theta[i-1]>=3 and theta[i]<=1.6): #3rd quadrant
                     theta[i]=np.pi+theta[i]
+            #coordinate rotation
+            theta2[i]=-theta[i]
+            a , b = xdata.loc[i].values*np.cos(theta2[i])-ydata.loc[i].values*np.sin(theta2[i]) , xdata.loc[i].values*np.sin(theta2[i])+ydata.loc[i].values*np.cos(theta2[i])
+            xdata.loc[i] , ydata.loc[i] = a , b
             #display progress    
             if i%100==0:
                 print("frames done:"+str(i))
@@ -98,9 +102,6 @@ def preprocess(filename_in,filename_out,center=None):
 
     #making new csv
     print("saving file")
-    thetacol=pd.DataFrame(theta)
-    thetacol.columns=['theta']
-    to_concat=[xdata,ydata,zdata,thetacol]
-    newdata=pd.concat(to_concat,axis=1)
+    newdata=pd.concat([xdata,ydata,zdata],axis=1)
     newdata.to_csv(filename_out,index=False)
     print("done")

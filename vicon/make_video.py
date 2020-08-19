@@ -1,13 +1,4 @@
-import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use('TkAgg') # Need to use in order to run on mac
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.colors import cnames
-from matplotlib import animation
-
-def make_video(filename_in,filename_out,elevation_angle=30,azimuth_angle=0,framerange=None,fps=30):
+def make_video(filename_in,filename_out,elevation_angle=0,azimuth_angle=0,framerange=None,fps=30,edgetype='edge'):
     ''' Uses pre-processed VICON data to
         generate a video of the motion at
         a specified viewing angle
@@ -20,7 +11,7 @@ def make_video(filename_in,filename_out,elevation_angle=30,azimuth_angle=0,frame
     filename_out: str,
         Path and name of the MP4 video file to be created
     elevation_angle: float, optional
-        Elevation (height) viewing angle, in degrees. (default=30)
+        Elevation (height) viewing angle, in degrees. (default=0)
     azimuth_angle: float, optional
         Azimuth (sideways) viewing angle, in degrees. (default=0)
     framerange: int, list (2 elements), tuple (2 elements), optional
@@ -28,6 +19,9 @@ def make_video(filename_in,filename_out,elevation_angle=30,azimuth_angle=0,frame
         generate the video
     fps: int, optional
         Frames per second of the generated video. (default=30)
+    edgetype: 'edge', None
+        Specifies if edges between the PLD dots are to be
+        included or not. (default='edge')
     
     Returns
     -------
@@ -40,19 +34,32 @@ def make_video(filename_in,filename_out,elevation_angle=30,azimuth_angle=0,frame
         changing to another reference frame, if convenient
     scrambled_video: uses pre-processed VICON data to produce
         video of scrambled points (non-biological motion)
+    central_dot: generate video of a central dot (resting interval)
 
     Example
     -------
     vicon.make_video('C:\\Users\\MyUser\\Documents\\Vicon\\pre_processed.csv',
         'C:\\Users\\MyUser\\Documents\\Vicon\\video.mp4',framerange=[500,2500])
     '''
+    import numpy as np
+    import pandas as pd
+    import matplotlib
+    matplotlib.use('TkAgg') # Needed to run on mac
+    from matplotlib import pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    from matplotlib.colors import cnames
+    from matplotlib import animation
+
 
     #definition of links between point-light displays, forming arms, legs, head etc
-    links=((0,2),(0,4),(1,2),(1,3),(4,5),(4,10),(5,6),(5,18),(5,20),(6,7),(6,14),(7,8),(8,9),(10,11),(10,14),(11,12),(12,13),(14,15),(15,16),(16,17),(18,19),(19,5))
+    if edgetype==None:
+        links=[]
+    else:
+        links=((0,1),(0,2),(0,4),(1,2),(1,3),(4,5),(4,10),(5,6),(5,18),(5,20),(6,7),(6,14),(7,8),(8,9),(10,11),(10,14),(11,12),(12,13),(14,15),(15,16),(16,17),(18,19),(19,5))
 
     #function to check if a pair is linked or not
     def islinked(n1,n2):
-        for i in range(len(links)):
+        for _ in range(len(links)):
             if (n1,n2)==(links[i][0],links[i][1]):
                         return True
         return False
@@ -69,7 +76,6 @@ def make_video(filename_in,filename_out,elevation_angle=30,azimuth_angle=0,frame
     xdata=data.filter(['X','X.1','X.2','X.3','X.4','X.5','X.6','X.7','X.8','X.9','X.10','X.11','X.12','X.13','X.14','X.15','X.16','X.17','X.18','X.19'],axis=1)
     ydata=data.filter(['Y','Y.1','Y.2','Y.3','Y.4','Y.5','Y.6','Y.7','Y.8','Y.9','Y.10','Y.11','Y.12','Y.13','Y.14','Y.15','Y.16','Y.17','Y.18','Y.19'],axis=1)
     zdata=data.filter(['Z','Z.1','Z.2','Z.3','Z.4','Z.5','Z.6','Z.7','Z.8','Z.9','Z.10','Z.11','Z.12','Z.13','Z.14','Z.15','Z.16','Z.17','Z.18','Z.19'],axis=1)
-    theta=data.filter(['theta'],axis=1)
     
     numframes=len(data.index)
 
@@ -104,7 +110,7 @@ def make_video(filename_in,filename_out,elevation_angle=30,azimuth_angle=0,frame
                     y=(ydata.iloc[i,name1],ydata.iloc[i,name2])
                     z=(zdata.iloc[i,name1],zdata.iloc[i,name2])
                     ax.plot3D(x,y,z,'w-',alpha=0.5)
-        ax.view_init(elevation_angle,np.degrees(theta.loc[i][0])+azimuth_angle)
+        ax.view_init(elevation_angle,azimuth_angle)
         
         #set axis limits, removeing grid, setting background etc
         ax.set_xlim(xmin,xmax)
