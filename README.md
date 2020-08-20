@@ -36,6 +36,7 @@ Now you can import the package in Python3 as: "import vicon"
 -----------------------------------------------------------------------------
 
 Sensor locations:
+
 0) elbow (right)
 1) wrist (right)
 2) midforearm (right)
