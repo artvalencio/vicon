@@ -58,6 +58,7 @@ def preprocess(filename_in,filename_out,center=None):
     zdata=data.filter(['Z','Z.1','Z.2','Z.3','Z.4','Z.5','Z.6','Z.7','Z.8','Z.9','Z.10','Z.11','Z.12','Z.13','Z.14','Z.15','Z.16','Z.17','Z.18','Z.19'],axis=1)
 
     theta=np.zeros(numframes)
+    theta2=np.zeros(numframes)
     if center=='shoulder':
         #coordinate translation to X5 (neck)
         print("axis translation")

@@ -1,8 +1,11 @@
-def central_dot(filename_out,seconds,fps=30,detector=None):
+def gen_detector_intro(filename_out,seconds,fps=30):
     ''' Generate a video of a central dot
         running for the defined number of
-        seconds, typically used as resting
-        interval for visual experiments
+        seconds, and a corner rectangle
+        with changing brigthness, used as
+        introduction step in experiment to
+        calibrate the stimulus-detector
+        synchronization apparatus.
 
     Parameters
     ----------
@@ -12,11 +15,6 @@ def central_dot(filename_out,seconds,fps=30,detector=None):
         Length in seconds of the video file to be created
     fps: int, optional
         Frames per second of the generated video. (default=30)
-    detector: float (0-1), None, optional
-        If a light detector will be used, creates a corner
-        with brightness provided by the user (0-1).
-        Otherwise, detector is set to None and no corner
-        is drawn
     
     Returns
     -------
@@ -31,14 +29,11 @@ def central_dot(filename_out,seconds,fps=30,detector=None):
         video of the movement at specified viewing angle
     scrambled_video: uses pre-processed VICON data to produce
         video of scrambled points (non-biological motion)
-    gen_detector_intro: creates a detector calibration to be
-        included at the start of experiments requiring precise 
-        sychronization.
+    central_dot: generate video of a central dot (resting interval)
 
     Example
     -------
-    vicon.central_dot('C:\\Users\\MyUser\\Documents\\Vicon\\rest_video.mp4',
-        15,detector=0.7)
+    vicon.gen_detector_intro('C:\\Users\\MyUser\\Documents\\Vicon\\intro_video.mp4',15)
     '''
     import numpy as np
     import pandas as pd
@@ -66,8 +61,17 @@ def central_dot(filename_out,seconds,fps=30,detector=None):
         #set axis limits, removeing grid, setting background etc
         ax.set_xlim(0,1)
         ax.set_ylim(0,1)
-        if detector!=None:
-            ax.add_patch(patches.Rectangle((0.95,0.85),0.1,0.3,fill=True,fc=(detector,detector,detector),zorder=2,clip_on=False))
+        #setting varying rectangle brightness levels for detector calibration
+        if i>12*fps:
+            detector=0.3
+        elif i>11*fps:
+            detector=0
+        elif i>10*fps:
+            detector=1
+        else:
+            detector=int(i/fps)/10
+        ax.add_patch(patches.Rectangle((0.95,0.85),0.1,0.3,fill=True,fc=(detector,detector,detector),zorder=2,clip_on=False))
+        #black background
         ax.patch.set_facecolor('black')
         fig.set_facecolor('black')
         plt.axis('off')

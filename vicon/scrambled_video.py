@@ -1,9 +1,9 @@
 def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
-                    framerange=None,fps=30,detector=None):
+                    framerange=None,fps=30,detector=None,axislims=None,detector_loc=None):
 
     ''' Uses pre-processed VICON data to
-        generate a video of the motion at
-        a specified viewing angle
+        generate a video of scrambled
+        points (non-biological motion)
 
     Parameters
     ----------
@@ -37,6 +37,15 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
         with brightness provided by the user (0-1).
         Otherwise, detector is set to None and no corner
         is drawn
+    axislims: list (3 elements), tuple (3 elements), None, optional
+        Defines the axis limits, in x,y,z coordinates. The
+        generated plot will range from -x to x, -y to y and
+        -z to z. If None, it will obtain the limits from the
+        data (default).
+    detector_loc: list (2 elements), tuple (2 elements), None, optional
+        Defines the detector location, in x,z coordinates.
+        If None, it assumes the detector is positioned at
+        (xmax+180,zmax+500), which might not be ideal (default).
             
     Returns
     -------
@@ -73,13 +82,13 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
         xlims=(x.loc[0].max(),x.loc[0].min())
         ylims=(y.loc[0].max(),y.loc[0].min())
         zlims=(z.loc[0].max(),z.loc[0].min())
-        x0=np.random.uniform(xlims[0],xlims[1],len(x.columns))
-        y0=np.random.uniform(ylims[0],xlims[1],len(y.columns))
-        z0=np.random.uniform(zlims[0],xlims[1],len(z.columns))
-        for i in range(len(x.index)): #updating trajectory
-            x.loc[i]=x.loc[i]-x0
-            y.loc[i]=y.loc[i]-y0
-            z.loc[i]=z.loc[i]-z0
+        x0=np.random.uniform(2*xlims[0]/3,2*xlims[1]/3,len(x.columns))
+        y0=np.random.uniform(2*ylims[0]/3,2*xlims[1]/3,len(y.columns))
+        z0=np.random.uniform(2*zlims[0]/3,2*xlims[1]/3,len(z.columns))
+        for i in range(20): #updating trajectory
+            x.iloc[:,i]=x.iloc[:,i]+x0[i]
+            y.iloc[:,i]=y.iloc[:,i]+y0[i]
+            z.iloc[:,i]=z.iloc[:,i]+z0[i]
         return x,y,z
         
     #function to do the constrained scrambling method
@@ -89,16 +98,22 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
         y0=np.random.uniform(ylims[0],xlims[1],len(y.columns))
         z0=np.random.uniform(zlims[0],xlims[1],len(z.columns))
         for i in range(20):#defining new random initial positions if passed constraint limit at any moment
-            while xlims[0]>(x.iloc[:,i].values+x0[i]).min() and (x.iloc[:,i].values+x0[i]).max()<=xlims[1]:
-                x0[i]=np.random.uniform(xlims[0],xlims[1])
-            while ylims[0]>(y.iloc[:,i]+y0[i]).min() and (y.iloc[:,i]+y0[i]).max()<=ylims[1]:
-                y0[i]=np.random.uniform(ylims[0],ylims[1])
-            while zlims[0]>(z.iloc[:,i]+z0[i]).min() and (z.iloc[:,i]+z0[i]).max()<=zlims[1]:
-                z0[i]=np.random.uniform(zlims[0],zlims[1])
-        for i in range(len(x.index)): #updating trajectory
-            x.loc[i]=x.loc[i]-x0
-            y.loc[i]=y.loc[i]-y0
-            z.loc[i]=z.loc[i]-z0
+            while (x.iloc[:,i]+x0[i]).min()<xlims[0]:
+                x0[i]=x0[i]+np.random.uniform(0,100)
+            while (x.iloc[:,i]+x0[i]).max()>xlims[1]:
+                x0[i]=x0[i]-np.random.uniform(0,100)
+            while (y.iloc[:,i]+y0[i]).min()<ylims[0]:
+                y0[i]=y0[i]+np.random.uniform(0,100)
+            while (y.iloc[:,i]+y0[i]).max()>ylims[1]:
+                y0[i]=y0[i]-np.random.uniform(0,100)
+            while (z.iloc[:,i]+z0[i]).min()<zlims[0]:
+                z0[i]=z0[i]+np.random.uniform(0,100)
+            while (z.iloc[:,i]+z0[i]).max()>zlims[1]:
+                z0[i]=z0[i]-np.random.uniform(0,100)
+        for i in range(20): #updating trajectory
+            x.iloc[:,i]=x.iloc[:,i]+x0[i]
+            y.iloc[:,i]=y.iloc[:,i]+y0[i]
+            z.iloc[:,i]=z.iloc[:,i]+z0[i]
         return x,y,z
     
     #function to do the pairwise scrambling method
@@ -169,29 +184,36 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
         data = pd.read_csv(filename_in, skiprows=framerange[0], nrows=framerange[1]-framerange[0], header=None)
         data.columns=columnnames.columns
     else:
-        data = pd.read_csv(filename_in)  
+        data = pd.read_csv(filename_in)
+    data.replace([np.inf, -np.inf], np.nan).dropna()
     xdata=data.filter(['X','X.1','X.2','X.3','X.4','X.5','X.6','X.7','X.8','X.9','X.10','X.11','X.12','X.13','X.14','X.15','X.16','X.17','X.18','X.19'],axis=1)
     ydata=data.filter(['Y','Y.1','Y.2','Y.3','Y.4','Y.5','Y.6','Y.7','Y.8','Y.9','Y.10','Y.11','Y.12','Y.13','Y.14','Y.15','Y.16','Y.17','Y.18','Y.19'],axis=1)
     zdata=data.filter(['Z','Z.1','Z.2','Z.3','Z.4','Z.5','Z.6','Z.7','Z.8','Z.9','Z.10','Z.11','Z.12','Z.13','Z.14','Z.15','Z.16','Z.17','Z.18','Z.19'],axis=1)
     
     numframes=len(data.index)
 
-    #calculate the data limits
-    x_max=xdata.max(axis=1)
-    x_min=xdata.min(axis=1)
-    y_max=ydata.max(axis=1)
-    y_min=ydata.min(axis=1)
-    z_max=zdata.max(axis=1)
-    z_min=zdata.min(axis=1)
-        
     #calculate the axis limits
-    a=max(np.absolute(xdata.min().min()),np.absolute(xdata.max().max()))
-    xmin,xmax=-(a+100),a+100
-    b=max(np.absolute(ydata.min().min()),np.absolute(ydata.max().max()))
-    ymin,ymax=-(b+100),b+100
-    c=max(np.absolute(zdata.min().min()),np.absolute(zdata.max().max()))
-    zmin,zmax=-c,c
+    if type(axislims)==list or type(axislims)==tuple:
+        xmax,xmin=axislims[0],-axislims[0]
+        ymax,ymin=axislims[1],-axislims[1]
+        zmax,zmin=axislims[2],-axislims[2]
+    else:
+        x_max,x_min=xdata.max(axis=1),xdata.min(axis=1)
+        y_max,y_min=ydata.max(axis=1),ydata.min(axis=1)
+        z_max,z_min=zdata.max(axis=1),zdata.min(axis=1)
+        a=max(np.absolute(xdata.min().min()),np.absolute(xdata.max().max()))
+        xmin,xmax=-(a+100),a+100
+        b=max(np.absolute(ydata.min().min()),np.absolute(ydata.max().max()))
+        ymin,ymax=-(b+100),b+100
+        c=max(np.absolute(zdata.min().min()),np.absolute(zdata.max().max()))
+        zmin,zmax=-c,c
 
+    #centering
+    xdata=xdata-xdata.mean().mean()
+    ydata=ydata-ydata.mean().mean()
+    zdata=zdata-zdata.mean().mean()
+
+    #scrambling
     if scrambletype=='scrambled':
         xdata,ydata,zdata=calc_scrambled(xdata,ydata,zdata)
     elif scrambletype=='pairwise':
@@ -199,13 +221,14 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
     else:
         xdata,ydata,zdata=calc_constrained(xdata,ydata,zdata)
 
+
+
     #generate figure
     fig = plt.figure()
+    plt.style.use('dark_background')
     fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
     fig.set_size_inches(13.66, 7.68, forward=True)
     ax = plt.axes(projection='3d')
-
-    print("generating animation")
 
     def animate(i):
         xline=xdata.loc[i]
@@ -229,7 +252,10 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
         ax.set_ylim(ymin,ymax)
         ax.set_zlim(zmin,zmax)
         if detector!=None:
-            p = patches.Rectangle((xmax+180,zmax+500),100,1000,fill=True,fc=(detector,detector,detector),zorder=2,clip_on=False)
+            if type(detector_loc)==tuple or type(detector_loc)==list:
+                p = patches.Rectangle((detector_loc[0],detector_loc[1]),100,1000,fill=True,fc=(detector,detector,detector),zorder=2,clip_on=False)
+            else:
+                p = patches.Rectangle((2*xmax+xmax/8,zmax+zmax/2.8),xmax/4,zmax/2,fill=True,fc=(detector,detector,detector),zorder=2,clip_on=False)
             ax.add_patch(p)
             art3d.pathpatch_2d_to_3d(p, z=0, zdir="x")         
         ax.patch.set_facecolor('black')
@@ -244,5 +270,6 @@ def scrambled_video(filename_in,filename_out,links=None,scrambletype='pairwise',
     Writer = animation.writers['ffmpeg']
     writer = animation.FFMpegWriter(fps=fps,metadata=dict(artist='NeuroMat'),bitrate=1800,extra_args=['-vcodec','libx264'])
 
-    #save animation
+    #save animation and closing figure
     ani.save(filename_out, writer=writer)
+    plt.close()

@@ -1,7 +1,17 @@
 # Vicon package.
 
-This package provides functions for data analysis from VICON Motion Capture system
+This package provides functions for generating experiments with VICON
+Motion Capture system
 
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Requirements:
+
+This package requires previous installation of Python>=3.6, numpy package,
+pandas package and FFmpeg
+
+-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 Installation:
 
@@ -26,60 +36,47 @@ Now you can import the package in Python3 as: "import vicon"
 -----------------------------------------------------------------------------
 
 Sensor locations:
-
-0: elbow (right)
-
-1: wrist (right)
-
-2: midforearm (right)
-
-3: hand finger (right)
-
-4: shoulder (right)
-
-5: neck
-
-6: shoulder (left)
-
-7: elbow (left)
-
-8: wrist (left)
-
-9: hand finger (left)
-
-10: waist (right side)
-
-11: knee (right)
-
-12: ankle (right)
-
-13: foot (right)
-
-14: waist (left side)
-
-15: knee (left)
-
-16: ankle (left)
-
-17: foot (left)
-
-18: eye (right)
-
-19: ear (left)
+0) elbow (right)
+1) wrist (right)
+2) midforearm (right)
+3) hand finger (right)
+4) shoulder (right)
+5) neck
+6) shoulder (left)
+7) elbow (left)
+8) wrist (left)
+9) hand finger (left)
+10) waist (right side)
+11) knee (right)
+12) ankle (right)
+13) foot (right)
+14) waist (left side)
+15) knee (left)
+16) ankle (left)
+17) foot (left)
+18) eye (right)
+19) ear (left)
 
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
+
 Licence and acknoledgements
+
 Open source licence: MIT
+
 Developer: Arthur Valencio
+
 Institution: Institute of Computing/University of Campinas and
 	     Research, Innovation and Dissemination Center for Neuromathematics
+
 Funder: FAPESP (S. Paulo Research Foundation), Brazil
+
 Acknowledgements: Arthur Valencio is supported by the FAPESP grant 2018/09900-8 and 	     acknowledges this work as part of the activities of the FAPESP Research 	     Innovation and Dissemination Center for Neuromathematics (grant 
 	     2013/07699-0, S. Paulo Research Foundation)
 
 Licence text:
+
 Copyright (c) 2018 The Python Packaging Authority
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

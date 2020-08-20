@@ -1,4 +1,6 @@
-def make_video(filename_in,filename_out,elevation_angle=0,azimuth_angle=0,framerange=None,fps=30,edgetype='edge'):
+def make_video(filename_in,filename_out,elevation_angle=0,
+               azimuth_angle=0,framerange=None,fps=30,edgetype='edge',
+               axislims=None):
     ''' Uses pre-processed VICON data to
         generate a video of the motion at
         a specified viewing angle
@@ -22,6 +24,11 @@ def make_video(filename_in,filename_out,elevation_angle=0,azimuth_angle=0,framer
     edgetype: 'edge', None
         Specifies if edges between the PLD dots are to be
         included or not. (default='edge')
+    axislims: list (3 elements), tuple (3 elements), None, optional
+        Defines the axis limits, in x,y,z coordinates. The
+        generated plot will range from -x to x, -y to y and
+        -z to z. If None, it will obtain the limits from the
+        data (default).
     
     Returns
     -------
@@ -72,28 +79,38 @@ def make_video(filename_in,filename_out,elevation_angle=0,azimuth_angle=0,framer
         data = pd.read_csv(filename_in, skiprows=framerange[0], nrows=framerange[1]-framerange[0], header=None)
         data.columns=columnnames.columns
     else:
-        data = pd.read_csv(filename_in)  
+        data = pd.read_csv(filename_in)
+    data.replace([np.inf, -np.inf], np.nan).dropna()
     xdata=data.filter(['X','X.1','X.2','X.3','X.4','X.5','X.6','X.7','X.8','X.9','X.10','X.11','X.12','X.13','X.14','X.15','X.16','X.17','X.18','X.19'],axis=1)
     ydata=data.filter(['Y','Y.1','Y.2','Y.3','Y.4','Y.5','Y.6','Y.7','Y.8','Y.9','Y.10','Y.11','Y.12','Y.13','Y.14','Y.15','Y.16','Y.17','Y.18','Y.19'],axis=1)
     zdata=data.filter(['Z','Z.1','Z.2','Z.3','Z.4','Z.5','Z.6','Z.7','Z.8','Z.9','Z.10','Z.11','Z.12','Z.13','Z.14','Z.15','Z.16','Z.17','Z.18','Z.19'],axis=1)
     
     numframes=len(data.index)
 
+    #centering
+    xdata=xdata-xdata.mean().mean()
+    ydata=ydata-ydata.mean().mean()
+    zdata=zdata-zdata.mean().mean()
+
     #calculate the axis limits
-    a=max(np.absolute(xdata.min().min()),np.absolute(xdata.max().max()))
-    xmin,xmax=-(a+100),a+100
-    b=max(np.absolute(ydata.min().min()),np.absolute(ydata.max().max()))
-    ymin,ymax=-(b+100),b+100
-    c=max(np.absolute(zdata.min().min()),np.absolute(zdata.max().max()))
-    zmin,zmax=-c,c
+    if type(axislims)==tuple or type(axislims)==list:
+        xmax,xmin=axislims[0],-axislims[0]
+        ymax,ymin=axislims[1],-axislims[1]
+        zmax,zmin=axislims[2],-axislims[2]
+    else:
+        a=max(np.absolute(xdata.min().min()),np.absolute(xdata.max().max()))
+        xmin,xmax=-(a+100),a+100
+        b=max(np.absolute(ydata.min().min()),np.absolute(ydata.max().max()))
+        ymin,ymax=-(b+100),b+100
+        c=max(np.absolute(zdata.min().min()),np.absolute(zdata.max().max()))
+        zmin,zmax=-c,c
 
     #generate figure
     fig = plt.figure()
+    plt.style.use('dark_background')
     fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
     fig.set_size_inches(13.66, 7.68, forward=True)
     ax = plt.axes(projection='3d')
-
-    print("generating animation")
 
     def animate(i):
         xline=xdata.loc[i]
@@ -128,5 +145,6 @@ def make_video(filename_in,filename_out,elevation_angle=0,azimuth_angle=0,framer
     Writer = animation.writers['ffmpeg']
     writer = animation.FFMpegWriter(fps=fps,metadata=dict(artist='NeuroMat'),bitrate=1800,extra_args=['-vcodec','libx264'])
 
-    #save animation
+    #save animation and close figure
     ani.save(filename_out, writer=writer)
+    plt.close()
